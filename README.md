@@ -4,3 +4,9 @@
 此程序是由 Vue3 + antd 纯前端构成的单页应用。
 
 NodeJs version: 20.7.0
+
+## 目录说明
+
+webApp：是用于编写扫码下载页的App。
+
+webUI：给我方项目经理直接使用的App。
