@@ -17,7 +17,7 @@
 import { ref, onBeforeMount } from 'vue'
 import { ArrowUpOutlined } from '@ant-design/icons-vue';
 
-const downloadUrl = "http://58.57.28.230:18091/download/exam.apk"
+const downloadUrl = "rtqrapp_input_key_download_url"
 
 const isWXClient = ref(false)
 
