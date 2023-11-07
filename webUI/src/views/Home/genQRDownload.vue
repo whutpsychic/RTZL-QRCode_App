@@ -34,8 +34,8 @@ interface FormState {
 }
 
 const formState = reactive<FormState>({
-  appname: '应用名称',
-  downloadUrl: 'https://www.baidu.com',
+  appname: '',
+  downloadUrl: '',
 });
 
 const loading = ref(false)
