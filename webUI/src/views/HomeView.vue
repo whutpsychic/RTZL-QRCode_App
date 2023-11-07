@@ -18,7 +18,7 @@ import { ref } from 'vue';
 import genQRCode from './Home/genQRCode.vue'
 import genQRDownload from './Home/genQRDownload.vue'
 
-const activeKey = ref('2');
+const activeKey = ref('1');
 
 </script>
 
