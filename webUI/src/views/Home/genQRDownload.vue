@@ -9,19 +9,21 @@
         <a-input v-model:value="formState.downloadUrl" />
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit">下载文件包</a-button>
+        <a-button type="primary" html-type="submit" :loading="loading">下载文件包</a-button>
       </a-form-item>
     </a-form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
-import fs from 'fs'
-// const fs = require('fs')
-// import index from '@/downloadSrc/assets/index.txt';
-// import style from '@/downloadSrc/assets/style.txt';
-// import indexHtml from '@/downloadSrc/index.html';
+import { ref, reactive } from 'vue';
+import axios from 'axios';
+import { saveAs } from 'file-saver';
+import JsZip from 'jszip';
+
+const htmlUrl = "https://raw.githubusercontent.com/whutpsychic/RTZL-QRCode_App/main/webApp/publish/index.html"
+const jsUrl = "https://raw.githubusercontent.com/whutpsychic/RTZL-QRCode_App/main/webApp/publish/assets/index.js"
+const cssUrl = "https://raw.githubusercontent.com/whutpsychic/RTZL-QRCode_App/main/webApp/publish/assets/index.css"
 
 const nameKey = 'rtqrapp_input_key_appname'
 const urlKey = 'rtqrapp_input_key_download_url'
@@ -32,59 +34,78 @@ interface FormState {
 }
 
 const formState = reactive<FormState>({
-  appname: 'a',
-  downloadUrl: 'a',
+  appname: '应用名称',
+  downloadUrl: 'https://www.baidu.com',
 });
 
+const loading = ref(false)
+
 const onFinishFailed = (errorInfo: any) => {
-  // console.log('Failed:', errorInfo);
+  console.log('Failed:', errorInfo);
 };
 
 const onFinish = (values: any) => {
-  console.log('Success:', values);
+  loading.value = true
   // 开始准备下载
   downloadWebpage()
 };
 
+async function getFile(url: string, type: string) {
+  const response = await axios.get(url).catch((err: Error) => {
+    console.error(err)
+  })
+  if (response && response.data) {
+    let dataStr = response.data
+    // 装填.html
+    if (type === 'html') {
+      dataStr = dataStr.replace(nameKey, formState.appname);
+    }
+    // 装填.js
+    else if (type === 'js') {
+      dataStr = dataStr.replace(urlKey, formState.downloadUrl);
+    }
+    // 装填.css
+    else if (type === 'css') {
+    }
 
-const downloadWebpage = () => {
-
-  console.log("-----------------------------------------1")
-  console.log(fs.readFileSync)
-  // 装填.html
-  const buf = fs.readFileSync('../../downloadSrc/index.html',)
-  console.log("-----------------------------------------2")
-  console.log(buf)
-  console.log(buf.toString('utf-8'))
-  console.log("==========================================")
-
-  // const reader=new FileReader()
-
-  // reader.readAsText(fs.readFileSync('@/downloadSrc/index.html'))
-
-
-  // const blobHtml = new Blob(["Hello, world!"], { type: "text/plain;charset=utf-8" });
-
-
-
-
-  // 装填.js
-  // 装填.css
-
-
-
-
-
+    const blob = new Blob([dataStr], { type: "text/plain;charset=utf-8" });
+    return blob;
+  }
 }
 
+const downloadWebpage = async () => {
+  Promise.all([getFile(htmlUrl, 'html'), getFile(jsUrl, 'js'), getFile(cssUrl, 'css')]).then((res) => {
+    const blobHtml = res[0]
+    const blobJs = res[1]
+    const blobCss = res[2]
 
+    const success = blobHtml && blobJs && blobCss
 
+    if (success) {
+      let zip = new JsZip();
+      zip.file("index.html", blobHtml);
 
+      let assets = zip.folder("assets");
+      if (assets) {
+        assets.file("index.js", blobJs);
+        assets.file("index.css", blobCss);
+      }
 
+      // 打包下载
+      zip.generateAsync({ type: "blob" })
+        .then(function (content) {
+          // see FileSaver.js
+          saveAs(content, "扫码下载页.zip");
+        });
+    } else {
+      alert("无法连接至Github，请检查网络连接状态！")
+      return
+    }
 
+  })
 
-
-
+  loading.value = false
+}
 
 </script>
 
