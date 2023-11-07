@@ -12,12 +12,14 @@
   },
   "dependencies": {
     "ant-design-vue": "^4.0.6",
+    "file-saver": "^2.0.5",
     "qrcode": "^1.5.3",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
+    "@types/file-saver": "^2.0.6",
     "@types/node": "^18.11.12",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-prettier": "^7.0.0",

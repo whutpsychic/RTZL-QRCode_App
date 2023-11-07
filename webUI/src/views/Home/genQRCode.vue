@@ -11,7 +11,7 @@
         <p v-if="!qrimg">此处预览二维码</p>
         <img v-else alt="生成的二维码" class="qrimg" :src="qrimg" />
       </div>
-      <a-button class="opt save-btn" block>
+      <a-button class="opt save-btn" block @click="saveImg">
         <template #icon>
           <DownloadOutlined style="font-size:20px;" />
         </template>
@@ -22,14 +22,31 @@
 </template>
 
 <script setup lang="ts">
-import QRCode from 'qrcode';
 import { ref } from 'vue';
+import QRCode from 'qrcode';
 import { DownloadOutlined } from '@ant-design/icons-vue';
+import { saveAs } from 'file-saver';
 
 // 输入值
 const inputValue = ref<string>('');
 // 图片值
 const qrimg = ref<string>('');
+
+function base64ToBlob(base64str: string) {
+  const arr = base64str.split(',')
+  const _mimeArr = arr[0].match(/:(.*?);/);
+  let mime;
+  if (_mimeArr && _mimeArr[1]) {
+    mime = _mimeArr[1];
+  }
+  const bstr = atob(arr[1])
+  let n = bstr.length
+  let u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n)
+  }
+  return new Blob([u8arr], { type: mime })
+}
 
 const onGenerate = () => {
   if (!inputValue.value) {
@@ -40,7 +57,7 @@ const onGenerate = () => {
       errorCorrectionLevel: 'H',
       type: 'image/png',
       width: 200,
-      version: 2,
+      // mode: "Kanji"
       // margin: 1,
       // color: {
       //   dark: "#010599FF",
@@ -55,6 +72,12 @@ const onGenerate = () => {
         console.error(err)
       })
   }
+}
+
+const saveImg = () => {
+  const url = qrimg.value
+  const blob = base64ToBlob(url)
+  saveAs(blob, "保存的二维码.png");
 }
 
 </script>
@@ -103,8 +126,4 @@ const onGenerate = () => {
   margin: 0;
 }
 
-/* .qrimg{
-  width: 100%;
-  height: 100%;
-} */
 </style>
